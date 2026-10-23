@@ -4,7 +4,7 @@ The public web app belongs at `https://wanderwrap.co.uk` (and optionally `https:
 
 ## 1. Import the GitHub repository into Vercel
 
-1. Open [Vercel — New Project](https://vercel.com/new) and import `joboyebisi/TenderTeddy`.
+1. Open [Vercel — New Project](https://vercel.com/new) and import `joboyebisi/TenderTeddy`. The verified app is currently on `wanderwrap-web-launch`; select that as the Production Branch until the repository owner reconciles the unrelated force-update on `main`.
 2. Set **Root Directory** to `apps/web`. Keep **Include source files outside the Root Directory** enabled so Vercel can use the repository lockfile/workspace.
 3. Choose the **Next.js** framework preset. The build command is `npm run build`; no output-directory override is needed.
 4. Add these Production environment variables:

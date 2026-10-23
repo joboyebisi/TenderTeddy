@@ -4,6 +4,8 @@ Last updated: 2026-10-23
 
 Latest verification: `npm run check` passed on 2026-10-23 — Alexa MCP App build, Next.js production build (including landing, connections, sign-up, dashboard and simulator routes), AWS handler syntax, and 92/92 automated tests. `npm run test:e2e` independently passed 3/3 HTTP golden-path tests. Local HTTP smoke checks returned 200 for `/`, `/connections` and `/simulator`; the unauthenticated session failed closed and `/api/auth/signup` produced a Cognito PKCE redirect. AWS health returned 200, both application alarms were `OK`, and the deployment IAM stack reached `CREATE_COMPLETE`.
 
+Git checkpoint: commit `bb4ce22` and the subsequent launch-runbook checkpoint are published to `origin/wanderwrap-web-launch`. Remote `main` was force-updated to an unrelated older TenderTeddy/Fire TV tree, so it was deliberately not overwritten. Reconcile that branch history explicitly before making `main` the Vercel production branch.
+
 This is the durable handoff for humans and coding agents. Read it first; update it after material work. It records what is proven, what is simulated, and the next safe step. It must never contain secrets.
 
 ## Product checkpoint
@@ -56,11 +58,12 @@ Then open `http://127.0.0.1:4202/alexa-simulator.html`. `npm run test:e2e` start
 
 1. The GitHub deployment identity is now created, but human AWS CLI access still identifies as account root. Configure IAM Identity Center/SSO before further routine human operations.
 2. The Next.js web app has no public SSR host yet. The domain uses GoDaddy nameservers; `api.wanderwrap.co.uk` is not configured. Import the repo into Vercel, add the documented variables, attach the domain, then update AWS OAuth callbacks and allowed origins together.
-3. The development Cognito flow is ready but needs a human-created/verified test account to prove the complete browser PKCE callback and authenticated web journey.
-4. Alexa+ remote onboarding, the exact Alexa redirect URI, development add-on deployment, and Web Simulator evidence are incomplete.
-5. Amazon Creators and PayPal sandbox credentials have not been supplied through a secure secret store.
-6. The provider webhook/reconciliation loop and fulfilment/thank-you UI are not yet complete.
-7. `.devpost-hackathon-state.json` is absent, so no specific event, deadline, rules, or submission record is attached to the repo yet.
+3. GitHub `main` currently points at a different forced history; the verified launch is safely published on `wanderwrap-web-launch`. Choose whether to restore the WanderWrap history to `main` or configure that branch as Vercel production.
+4. The development Cognito flow is ready but needs a human-created/verified test account to prove the complete browser PKCE callback and authenticated web journey.
+5. Alexa+ remote onboarding, the exact Alexa redirect URI, development add-on deployment, and Web Simulator evidence are incomplete.
+6. Amazon Creators and PayPal sandbox credentials have not been supplied through a secure secret store.
+7. The provider webhook/reconciliation loop and fulfilment/thank-you UI are not yet complete.
+8. `.devpost-hackathon-state.json` is absent, so no specific event, deadline, rules, or submission record is attached to the repo yet.
 
 ## Next actions, in order
 
