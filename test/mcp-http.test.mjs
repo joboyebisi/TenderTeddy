@@ -30,7 +30,7 @@ test('protected resource metadata declares the canonical MCP audience and scopes
   const metadata = await response.json();
   assert.equal(metadata.resource, 'http://127.0.0.1/mcp');
   assert.deepEqual(metadata.authorization_servers, ['https://auth.example.test']);
-  assert.deepEqual(metadata.scopes_supported, ['gifts:read', 'gifts:write']);
+  assert.deepEqual(metadata.scopes_supported, ['wanderwrap/gifts.read', 'wanderwrap/gifts.write']);
 }));
 
 test('MCP transport requires bearer authentication', async () => withServer(async base => {

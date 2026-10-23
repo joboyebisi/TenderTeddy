@@ -15,6 +15,7 @@ export function createWanderWrapServer(options = {}) {
   const expectedToken = options.mcpToken ?? process.env.WANDERWRAP_MCP_TOKEN;
   const requireAuth = options.requireAuth ?? (Boolean(expectedToken) || process.env.NODE_ENV === 'production');
   const allowedOrigins = new Set(options.allowedOrigins || configuredOrigins(canonicalUrl));
+  const scopes = options.scopes || [process.env.WANDERWRAP_MCP_READ_SCOPE || 'wanderwrap/gifts.read', process.env.WANDERWRAP_MCP_WRITE_SCOPE || 'wanderwrap/gifts.write'];
 
   return http.createServer(async (req, res) => {
     const pathname = new URL(req.url, canonicalUrl).pathname;
@@ -23,7 +24,7 @@ export function createWanderWrapServer(options = {}) {
       return json(res, 200, {
         resource: `${canonicalUrl}/mcp`,
         authorization_servers: [authorizationIssuer],
-        scopes_supported: ['gifts:read', 'gifts:write'],
+        scopes_supported: scopes,
         bearer_methods_supported: ['header']
       }, { 'cache-control': 'public, max-age=300' });
     }

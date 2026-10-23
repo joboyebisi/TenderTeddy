@@ -7,10 +7,10 @@ import {
   SignUpCommand,
   ConfirmSignUpCommand,
   InitiateAuthCommand,
-  GetUserCommand,
   ForgotPasswordCommand,
   ConfirmForgotPasswordCommand
 } from '@aws-sdk/client-cognito-identity-provider';
+import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocumentClient,
@@ -32,6 +32,13 @@ const cognito = new CognitoIdentityProviderClient({});
 const providerPlatform = createDefaultProviderPlatform();
 const tableName = process.env.TABLE_NAME;
 const clientId = process.env.USER_POOL_CLIENT_ID;
+const canonicalUrl = trimSlash(process.env.WANDERWRAP_CANONICAL_URL || 'https://api.wanderwrap.co.uk');
+const authorizationIssuer = trimSlash(process.env.WANDERWRAP_AUTH_ISSUER || canonicalUrl);
+const readScope = process.env.WANDERWRAP_MCP_READ_SCOPE || 'wanderwrap/gifts.read';
+const writeScope = process.env.WANDERWRAP_MCP_WRITE_SCOPE || 'wanderwrap/gifts.write';
+const allowedOrigins = new Set((process.env.WANDERWRAP_ALLOWED_ORIGINS || '').split(',').map(value => value.trim()).filter(Boolean));
+const writeTools = new Set(['create_gift_link', 'create_group_gift', 'prepare_paypal_order']);
+let jwtVerifier;
 const publicRoot = fileURLToPath(new URL('../public/', import.meta.url));
 const contentTypes = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -42,19 +49,28 @@ const contentTypes = {
 export async function handler(event) {
   const method = event.requestContext?.http?.method || 'GET';
   const path = event.rawPath || '/';
-  const origin = `https://${event.requestContext?.domainName || 'wanderwrap.local'}`;
+  const origin = canonicalUrl;
   try {
-    if (method === 'OPTIONS') return response(204, '', cors(event));
+    if (method === 'OPTIONS') {
+      if (!isAllowedOrigin(event.headers?.origin)) throw httpError(403, 'Origin not allowed');
+      return response(204, '', cors(event));
+    }
     if (path === '/health') return json(200, { status: 'ok', service: 'wanderwrap', version: '1.0.0', protocolVersion: PROTOCOL_VERSION });
     if (path === '/.well-known/oauth-protected-resource' || path === '/.well-known/oauth-protected-resource/mcp') {
-      return json(200, { resource: `${origin}/mcp`, authorization_servers: [`${origin}/v1/auth`], scopes_supported: ['gifts:read', 'gifts:write'], bearer_methods_supported: ['header'] });
+      return json(200, { resource: `${origin}/mcp`, authorization_servers: [authorizationIssuer], scopes_supported: [readScope, writeScope], bearer_methods_supported: ['header'] });
     }
-    if (path.startsWith('/v1/auth/')) return await authRoute(path, body(event));
+    if (path.startsWith('/v1/auth/')) {
+      if (process.env.WANDERWRAP_LEGACY_AUTH_ENABLED !== 'true') throw httpError(404, 'Auth route not found');
+      return await authRoute(path, body(event));
+    }
     if (path.startsWith('/claim/')) return await claimRoute(method, path, event);
 
     if (path === '/mcp') {
-      const user = await authenticate(event);
-      const result = await handleMcpRequest(body(event), {
+      if (!isAllowedOrigin(event.headers?.origin)) throw httpError(403, 'Origin not allowed');
+      const message = body(event);
+      const requiredScope = message.method === 'tools/call' && writeTools.has(message.params?.name) ? writeScope : readScope;
+      const user = await authenticate(event, requiredScope);
+      const result = await handleMcpRequest(message, {
         userId: user.sub,
         tenantId: user.sub,
         enrichRecommendations: async recommendations => (await providerPlatform.execute(
@@ -67,7 +83,8 @@ export async function handler(event) {
     }
 
     if (path.startsWith('/v1/')) {
-      const user = await authenticate(event);
+      if (!isAllowedOrigin(event.headers?.origin)) throw httpError(403, 'Origin not allowed');
+      const user = await authenticate(event, method === 'GET' ? readScope : writeScope);
       return await apiRoute(method, path, body(event), user, origin);
     }
     return await staticRoute(path);
@@ -118,16 +135,33 @@ async function authRoute(path, input) {
   throw httpError(404, 'Auth route not found');
 }
 
-async function authenticate(event) {
+async function authenticate(event, requiredScope) {
   const accessToken = (event.headers?.authorization || event.headers?.Authorization || '').match(/^Bearer\s+(.+)$/i)?.[1];
   if (!accessToken) throw httpError(401, 'Sign in required');
   try {
-    const result = await cognito.send(new GetUserCommand({ AccessToken: accessToken }));
-    const attributes = Object.fromEntries((result.UserAttributes || []).map(item => [item.Name, item.Value]));
-    return { sub: attributes.sub, email: attributes.email, username: result.Username };
-  } catch {
-    throw httpError(401, 'Session expired. Please sign in again.');
+    const payload = await verifier().verify(accessToken);
+    const scopes = validateAccessTokenClaims(payload, { requiredScope, audience: `${canonicalUrl}/mcp` });
+    return { sub: payload.sub, email: payload.email, username: payload.username || payload['cognito:username'], scopes: [...scopes] };
+  } catch (error) {
+    if (error?.statusCode === 403 || error?.statusCode === 500) throw error;
+    throw httpError(401, 'Session is invalid or expired. Please sign in again.');
   }
+}
+
+export function validateAccessTokenClaims(payload, { requiredScope, audience }) {
+  const scopes = new Set(String(payload?.scope || '').split(' ').filter(Boolean));
+  if (payload?.aud !== audience) throw httpError(403, 'Token audience does not match this WanderWrap resource');
+  if (requiredScope && !scopes.has(requiredScope)) throw httpError(403, `Missing required scope: ${requiredScope}`);
+  return scopes;
+}
+
+function verifier() {
+  if (jwtVerifier) return jwtVerifier;
+  const userPoolId = process.env.USER_POOL_ID;
+  const clientIds = (process.env.WANDERWRAP_TOKEN_CLIENT_IDS || clientId || '').split(',').map(value => value.trim()).filter(Boolean);
+  if (!userPoolId || !clientIds.length) throw httpError(500, 'Token verifier is not configured');
+  jwtVerifier = CognitoJwtVerifier.create({ userPoolId, tokenUse: 'access', clientId: clientIds.length === 1 ? clientIds[0] : clientIds });
+  return jwtVerifier;
 }
 
 async function apiRoute(method, path, input, user, origin) {
@@ -301,9 +335,11 @@ function body(event) { if (!event.body) return {}; try { return JSON.parse(event
 function clean(value, max) { return String(value ?? '').trim().slice(0, max); }
 function hash(value) { return createHash('sha256').update(value).digest('hex'); }
 function now() { return new Date().toISOString(); }
+function trimSlash(value) { return value.replace(/\/$/, ''); }
+function isAllowedOrigin(origin) { return !origin || allowedOrigins.has(origin); }
 function requireFields(input, fields) { for (const field of fields) if (!input[field]) throw httpError(400, `${field} is required`); }
 function httpError(statusCode, message) { const error = new Error(message); error.statusCode = statusCode; return error; }
 function json(statusCode, value, headers = {}) { return response(statusCode, JSON.stringify(value), { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers }); }
 function response(statusCode, bodyValue, headers = {}) { return { statusCode, headers, body: bodyValue }; }
-function cors(event) { return { 'access-control-allow-origin': event.headers?.origin || '*', 'access-control-allow-headers': 'authorization,content-type,mcp-protocol-version', 'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS' }; }
+function cors(event) { return { 'access-control-allow-origin': event.headers?.origin || canonicalUrl, 'access-control-allow-headers': 'authorization,content-type,mcp-protocol-version', 'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS', vary: 'Origin' }; }
 function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]); }

@@ -2,10 +2,40 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: WanderWrap serverless application
 
 Parameters:
+  ProjectName:
+    Type: String
+    Default: wanderwrap
+    AllowedPattern: '[a-z0-9-]+'
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues: [development, staging, production]
   ArtifactBucket:
     Type: String
   ArtifactKey:
     Type: String
+  WebUrl:
+    Type: String
+    Default: https://wanderwrap.co.uk
+  AllowedOrigins:
+    Type: CommaDelimitedList
+    Default: https://wanderwrap.co.uk,https://www.wanderwrap.co.uk
+  AlexaRedirectUri:
+    Type: String
+    Default: ''
+    Description: Exact redirect URI supplied by Alexa+ onboarding. Leave empty until onboarding.
+  ApiDomainName:
+    Type: String
+    Default: ''
+  ApiCertificateArn:
+    Type: String
+    Default: ''
+
+Conditions:
+  HasAlexaRedirect: !Not [!Equals [!Ref AlexaRedirectUri, '']]
+  HasCustomApiDomain: !And
+    - !Not [!Equals [!Ref ApiDomainName, '']]
+    - !Not [!Equals [!Ref ApiCertificateArn, '']]
 
 Resources:
   DataTable:
@@ -13,7 +43,7 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      TableName: wanderwrap-data
+      TableName: !Sub ${ProjectName}-${Environment}-data
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: PK
@@ -41,7 +71,7 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      UserPoolName: wanderwrap-users
+      UserPoolName: !Sub ${ProjectName}-${Environment}-users
       UsernameAttributes: [email]
       AutoVerifiedAttributes: [email]
       AccountRecoverySetting:
@@ -60,10 +90,29 @@ Resources:
       UserPoolTags:
         Project: WanderWrap
 
+  ResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      UserPoolId: !Ref UserPool
+      Identifier: wanderwrap
+      Name: WanderWrap API
+      Scopes:
+        - ScopeName: gifts.read
+          ScopeDescription: Read gifting profiles, recommendations, routes and status
+        - ScopeName: gifts.write
+          ScopeDescription: Create and approve gifting actions
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub ${ProjectName}-${Environment}-${AWS::AccountId}
+      UserPoolId: !Ref UserPool
+
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
+    DependsOn: ResourceServer
     Properties:
-      ClientName: wanderwrap-web
+      ClientName: !Sub ${ProjectName}-${Environment}-web
       UserPoolId: !Ref UserPool
       GenerateSecret: false
       PreventUserExistenceErrors: ENABLED
@@ -78,11 +127,47 @@ Resources:
       ExplicitAuthFlows:
         - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - wanderwrap/gifts.read
+        - wanderwrap/gifts.write
+      CallbackURLs:
+        - !Sub ${WebUrl}/api/auth/callback
+      LogoutURLs:
+        - !Ref WebUrl
+      SupportedIdentityProviders: [COGNITO]
+
+  AlexaUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Condition: HasAlexaRedirect
+    DependsOn: ResourceServer
+    Properties:
+      ClientName: !Sub ${ProjectName}-${Environment}-alexa
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      AccessTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        RefreshToken: days
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes:
+        - openid
+        - wanderwrap/gifts.read
+        - wanderwrap/gifts.write
+      CallbackURLs: [!Ref AlexaRedirectUri]
+      SupportedIdentityProviders: [COGNITO]
 
   FunctionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: wanderwrap-lambda-role
+      RoleName: !Sub ${ProjectName}-${Environment}-lambda-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -118,8 +203,9 @@ Resources:
 
   AppFunction:
     Type: AWS::Lambda::Function
+    DependsOn: AppLogGroup
     Properties:
-      FunctionName: wanderwrap-app
+      FunctionName: !Sub ${ProjectName}-${Environment}-app
       Description: WanderWrap web, API and MCP application
       Runtime: nodejs22.x
       Architectures: [arm64]
@@ -135,22 +221,40 @@ Resources:
           TABLE_NAME: !Ref DataTable
           USER_POOL_ID: !Ref UserPool
           USER_POOL_CLIENT_ID: !Ref UserPoolClient
+          WANDERWRAP_TOKEN_CLIENT_IDS: !If
+            - HasAlexaRedirect
+            - !Join [',', [!Ref UserPoolClient, !Ref AlexaUserPoolClient]]
+            - !Ref UserPoolClient
+          WANDERWRAP_CANONICAL_URL: !If [HasCustomApiDomain, !Sub 'https://${ApiDomainName}', !GetAtt HttpApi.ApiEndpoint]
+          WANDERWRAP_AUTH_ISSUER: !Sub https://cognito-idp.${AWS::Region}.${AWS::URLSuffix}/${UserPool}
+          WANDERWRAP_ALLOWED_ORIGINS: !Join [',', !Ref AllowedOrigins]
+          WANDERWRAP_MCP_READ_SCOPE: wanderwrap/gifts.read
+          WANDERWRAP_MCP_WRITE_SCOPE: wanderwrap/gifts.write
+          WANDERWRAP_LEGACY_AUTH_ENABLED: 'false'
           BEDROCK_ENABLED: 'true'
           BEDROCK_REGION: eu-west-2
           BEDROCK_MODEL_ID: global.amazon.nova-2-lite-v1:0
           NODE_OPTIONS: --enable-source-maps
       Tags:
         - Key: Project
-          Value: WanderWrap
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ProjectName}-${Environment}-app
+      RetentionInDays: 30
 
   HttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
-      Name: wanderwrap-api
+      Name: !Sub ${ProjectName}-${Environment}-api
       ProtocolType: HTTP
       Description: WanderWrap HTTPS API
       CorsConfiguration:
-        AllowOrigins: ['*']
+        AllowOrigins: !Ref AllowedOrigins
         AllowHeaders: [authorization, content-type, mcp-protocol-version]
         AllowMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
         MaxAge: 300
@@ -193,10 +297,28 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
 
+  CustomApiDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Condition: HasCustomApiDomain
+    Properties:
+      DomainName: !Ref ApiDomainName
+      DomainNameConfigurations:
+        - CertificateArn: !Ref ApiCertificateArn
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  CustomApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Condition: HasCustomApiDomain
+    Properties:
+      ApiId: !Ref HttpApi
+      DomainName: !Ref CustomApiDomain
+      Stage: !Ref DefaultStage
+
   ErrorAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: wanderwrap-lambda-errors
+      AlarmName: !Sub ${ProjectName}-${Environment}-lambda-errors
       AlarmDescription: WanderWrap Lambda errors detected
       Namespace: AWS/Lambda
       MetricName: Errors
@@ -210,14 +332,39 @@ Resources:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       TreatMissingData: notBreaching
 
+  DurationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub ${ProjectName}-${Environment}-lambda-duration
+      AlarmDescription: WanderWrap Lambda p95 duration is above ten seconds
+      Namespace: AWS/Lambda
+      MetricName: Duration
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref AppFunction
+      ExtendedStatistic: p95
+      Period: 300
+      EvaluationPeriods: 2
+      DatapointsToAlarm: 2
+      Threshold: 10000
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
 Outputs:
   AppUrl:
-    Value: !GetAtt HttpApi.ApiEndpoint
+    Value: !If [HasCustomApiDomain, !Sub 'https://${ApiDomainName}', !GetAtt HttpApi.ApiEndpoint]
   ApiId:
     Value: !Ref HttpApi
   UserPoolId:
     Value: !Ref UserPool
   UserPoolClientId:
     Value: !Ref UserPoolClient
+  AlexaUserPoolClientId:
+    Condition: HasAlexaRedirect
+    Value: !Ref AlexaUserPoolClient
+  CognitoOAuthBaseUrl:
+    Value: !Sub https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
+  CognitoIssuer:
+    Value: !Sub https://cognito-idp.${AWS::Region}.${AWS::URLSuffix}/${UserPool}
   TableName:
     Value: !Ref DataTable

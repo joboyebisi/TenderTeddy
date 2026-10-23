@@ -1,28 +1,22 @@
-const steps = [
-  ['People', 'Invite someone or add preferences they have shared with you.'],
-  ['Moments', 'Birthdays, holidays and group occasions live in one timeline.'],
-  ['Ideas', 'Recommendations show why they fit, what is uncertain and what must be confirmed.'],
-  ['Gifts', 'Track approval, provider handoff, fulfilment and thank-you moments.']
-];
+import Link from 'next/link';
+import GiftWorkspace from './gift-workspace';
 
 export default function DashboardPage() {
   return (
     <main className="shell dashboard">
-      <header className="dashboardHeader">
-        <div><p className="eyebrow">YOUR GIFT SPACE</p><h1>Good evening.</h1></div>
-        <button className="primary" type="button">Ask WanderWrap</button>
+      <nav className="nav" aria-label="Dashboard navigation">
+        <Link className="brand" href="/">wanderwrap ✦</Link>
+        <form action="/api/auth/logout" method="post"><button className="quietButton" type="submit">Sign out</button></form>
+      </nav>
+      <header className="dashboardIntro">
+        <div>
+          <p className="eyebrow">YOUR GIFT SPACE</p>
+          <h1>Thoughtfulness, without the scramble.</h1>
+          <p className="lede">Add one person, confirm what they enjoy, and turn it into a shortlist you can understand.</p>
+        </div>
+        <div className="trustPill"><span aria-hidden="true">●</span> Nothing is purchased without your approval</div>
       </header>
-      <section className="journeyGrid" aria-label="Gifting journey">
-        {steps.map(([title, copy], index) => (
-          <article className="journeyCard" key={title}>
-            <span>{String(index + 1).padStart(2, '0')}</span><h2>{title}</h2><p>{copy}</p>
-          </article>
-        ))}
-      </section>
-      <aside className="systemNote">
-        <strong>One journey, not six bots.</strong>
-        <p>Continue a conversation started on Alexa or Telegram without giving either channel unrestricted access to your account.</p>
-      </aside>
+      <GiftWorkspace />
     </main>
   );
 }

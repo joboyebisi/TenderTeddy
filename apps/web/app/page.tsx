@@ -7,7 +7,7 @@ export default function HomePage() {
     <main className="shell">
       <nav className="nav" aria-label="Primary navigation">
         <Link className="brand" href="/">wanderwrap ✦</Link>
-        <Link className="navAction" href="/dashboard">Open your gift space</Link>
+        <div className="navLinks"><a className="navAction" href="/api/auth/login">Sign in</a><Link className="navAction" href="/dashboard">Open your gift space</Link></div>
       </nav>
       <section className="hero">
         <p className="eyebrow">ONE GIFTING MEMORY · EVERY CHANNEL</p>

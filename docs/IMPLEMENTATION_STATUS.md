@@ -29,7 +29,7 @@ This file turns the launch PRD and technical specification into a living deliver
 - [x] MCP Apps resource discovery, lifecycle bundle, structured UI data and voice-safe summaries
 - [x] Adaptive inline/fullscreen gift board with mobile/Echo layouts and touch-to-conversation actions
 - [x] Alexa+ add-on manifest, required icon sizes, carousel artwork, privacy and terms pages
-- [ ] OAuth 2.1 authorization-code + PKCE service and audience/scoped token validation
+- [ ] OAuth 2.1 authorization-code + PKCE service and audience/scoped token validation (implemented and deployed in the isolated development stack; human browser and Alexa linking evidence pending)
 - [x] Persistent user, recipient, evidence, gift, claim and audit repositories on DynamoDB
 
 ## First end-to-end launch journey
@@ -39,7 +39,7 @@ This file turns the launch PRD and technical specification into a living deliver
 - [ ] Consent receipts and source revocation
 - [x] Recommendation API backed by persistent confirmed evidence
 - [x] Recipient claim link with private delivery capture
-- [ ] PayPal sandbox create, approve, capture and signed webhook flow
+- [ ] PayPal sandbox create, approve, capture and signed webhook flow (OAuth/create/capture/webhook-verification client and idempotency contracts implemented; credentialed provider loop pending)
 - [ ] Fulfilment and thank-you status UI
 - [x] Audit events across recommendation, approval and provider routing
 
@@ -73,4 +73,4 @@ This file turns the launch PRD and technical specification into a living deliver
 
 ## Current checkpoint
 
-Alexa+ is now the primary product direction; the AWS web deployment is a frozen development preview until the add-on, OAuth linking and provider integrations are launch-ready. The first PRD 1.0 architecture tranche is implemented locally: preference evidence is consent-gated and confirmable; an optional XLM-R provider can propose strictly validated, non-rankable interest candidates; personality assessment requires separate subject consent and approval; recommendations expose a contribution ledger; and bounded agents execute through deterministic policy gates. The next model work is the licensed multilingual benchmark, a pinned fine-tuned artifact, privacy-log audit and shadow/canary rollout. External dependencies also include Alexa+ developer onboarding, OAuth 2.1/PKCE, provider credentials and commercial eligibility.
+Alexa+ is now the primary product direction; the original AWS preview remains frozen. An isolated `wanderwrap-development` stack now hosts the hardened API/MCP boundary and Cognito PKCE foundation without replacing production resources. The Next.js companion implements the first authenticated person-to-shortlist journey locally, but public SSR hosting, a verified browser login, Alexa account linking and provider credentials remain external gates. The next model work is the licensed multilingual benchmark, a pinned fine-tuned artifact, privacy-log audit and shadow/canary rollout.

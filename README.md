@@ -2,6 +2,8 @@
 
 **Frozen AWS development preview:** https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/studio.html
 
+**Isolated OAuth/MCP development API:** https://3eaf282enj.execute-api.eu-west-2.amazonaws.com — health, Cognito PKCE foundation, scoped/resource-bound JWT verification and restrictive origins are deployed. This is not a live-commerce claim; a public Next.js host, human linked-user test, Alexa+ onboarding and provider sandboxes are still required.
+
 Alexa+ is the primary WanderWrap product. The companion web app is the authenticated handoff and management surface. Do not promote or redeploy the preview until the Alexa+ add-on, account linking, payments and companion journey pass the readiness gates in `docs/ALEXA_PLUS_READINESS.md`.
 
 An explainable gifting companion for yourself and people you care about. The AWS deployment includes:
@@ -50,6 +52,8 @@ The X campaign adapter is intentionally not live: current X rules require explic
 The routing rule is intentionally simple: use a verified Amazon offer for a deliverable physical gift; use a PayPal-backed approved supplier when Amazon cannot fulfil; use PayPal/Xoom first for money gifts. Xoom is currently a handoff, not a claimed public transfer API.
 
 Start with `docs/PRD.md`. The two event-specific slices are `docs/PRD_AMAZON_ALEXA_PLUS.md` and `docs/PRD_PAYPAL_AI.md`; the implementation contract is `docs/TECHNICAL_SPEC.md`.
+
+The ordered external account and signup links are in `docs/LAUNCH_ACCOUNTS.md`. Never place the resulting secrets in the repository.
 
 For a local MCP smoke test, start the server and send JSON-RPC `initialize`, `tools/list`, or `tools/call` messages to `http://127.0.0.1:4202/mcp`. Requests use Streamable HTTP and must send `Content-Type: application/json` plus `Accept: application/json, text/event-stream`. Set `WANDERWRAP_MCP_TOKEN` to require a development bearer token.
 
