@@ -5,8 +5,8 @@ export default function DashboardPage() {
   return (
     <main className="shell dashboard">
       <nav className="nav" aria-label="Dashboard navigation">
-        <Link className="brand" href="/">wanderwrap ✦</Link>
-        <form action="/api/auth/logout" method="post"><button className="quietButton" type="submit">Sign out</button></form>
+        <Link className="brand" href="/">wanderwrap <span aria-hidden="true">✦</span></Link>
+        <div className="navLinks"><Link href="/connections">Connections</Link><Link href="/simulator">Alexa+ demo</Link><form action="/api/auth/logout" method="post"><button className="quietButton" type="submit">Sign out</button></form></div>
       </nav>
       <header className="dashboardIntro">
         <div>

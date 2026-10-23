@@ -2,7 +2,7 @@
 
 **Frozen AWS development preview:** https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/studio.html
 
-**Isolated OAuth/MCP development API:** https://3eaf282enj.execute-api.eu-west-2.amazonaws.com — health, Cognito PKCE foundation, scoped/resource-bound JWT verification and restrictive origins are deployed. This is not a live-commerce claim; a public Next.js host, human linked-user test, Alexa+ onboarding and provider sandboxes are still required.
+**Isolated OAuth/MCP development API:** https://3eaf282enj.execute-api.eu-west-2.amazonaws.com — health, Cognito PKCE foundation, scoped/resource-bound JWT verification and restrictive origins are deployed. This is not a live-commerce claim; Vercel/domain activation, a human linked-user test, Alexa+ onboarding and provider sandboxes are still required.
 
 Alexa+ is the primary WanderWrap product. The companion web app is the authenticated handoff and management surface. Do not promote or redeploy the preview until the Alexa+ add-on, account linking, payments and companion journey pass the readiness gates in `docs/ALEXA_PLUS_READINESS.md`.
 
@@ -35,11 +35,11 @@ An explainable gifting companion for yourself and people you care about. The AWS
 
 Run `npm install`, then `npm run demo` and open `http://127.0.0.1:4202/alexa-simulator.html`. Run `npm run test:e2e` for the authenticated HTTP golden path and `npm run check` to build the self-contained MCP App and execute the complete syntax and contract suite. The local server covers the static experience and MCP development harness; account and persistent API flows run in the frozen AWS development preview. Start each work session with `PROJECT_STATE.md`; the ordered live credential gates are in `docs/LIVE_INTEGRATION_CHECKLIST.md`.
 
-The primary web application now lives in `apps/web` as a Next.js App Router workspace. Run `npm run web:dev` for the web surface; set `WANDERWRAP_CORE_API_URL` to the channel-neutral core API. The existing Vite app remains the Alexa+ MCP App rather than serving as the general website. See `docs/OMNICHANNEL_ARCHITECTURE.md` for channel, mobile and bot boundaries.
+The primary web application now lives in `apps/web` as a Next.js App Router workspace. It includes a public landing page, `/connections`, customer Cognito sign-up/login, the authenticated `/dashboard`, and a protected `/simulator` that calls the real MCP boundary. Run `npm run web:dev` for the web surface; set `WANDERWRAP_CORE_API_URL` to the channel-neutral core API. The existing Vite app remains the Alexa+ MCP App rather than serving as the general website. Follow `docs/WEB_LAUNCH_RUNBOOK.md` for Vercel, domain, OAuth and customer-flow setup.
 
 ## AWS deployment
 
-The `wanderwrap-production` CloudFormation stack in `eu-west-2` owns the application Lambda, HTTP API, Cognito user pool, DynamoDB table, least-privilege Lambda role and error alarm. Source infrastructure is in `infrastructure/template.yaml`; the Lambda entry point is `src/aws-handler.mjs`.
+The isolated `wanderwrap-development` CloudFormation stack in `eu-west-2` owns the active application Lambda, HTTP API, Cognito user pool, DynamoDB table, least-privilege Lambda role and alarms. Source infrastructure is in `infrastructure/template.yaml`; the Lambda entry point is `src/aws-handler.mjs`. The separate `wanderwrap-deployment-iam` stack supplies short-lived GitHub OIDC deployment credentials without changing runtime permissions.
 
 The data table and user pool use retain policies. Deployment artifacts are stored separately in `wanderwrap-artifacts-695912022574-eu-west-2`. All created resources use a `wanderwrap-` name or a `Project=WanderWrap` tag.
 

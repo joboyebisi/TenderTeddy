@@ -18,6 +18,8 @@ This file turns the launch PRD and technical specification into a living deliver
 - [x] Provider identity bound into signed agent approvals and execution provenance
 - [x] Channel-neutral verified event envelopes, identity trust, policy dispatch and webhook deduplication
 - [x] Next.js App Router web workspace with constrained core-API backend-for-frontend
+- [x] Branded responsive landing page, honest channel-connection hub and verified-email customer sign-up entry point
+- [x] Authenticated browser Alexa+ journey simulator calling the protected MCP initialize, discovery, recommendation and routing sequence
 - [x] Deliverability-aware Amazon / PayPal / Xoom routing policy
 - [x] Claim-link and group-gift state machines
 - [x] Server-priced PayPal Orders payload and capture guard
@@ -73,4 +75,4 @@ This file turns the launch PRD and technical specification into a living deliver
 
 ## Current checkpoint
 
-Alexa+ is now the primary product direction; the original AWS preview remains frozen. An isolated `wanderwrap-development` stack now hosts the hardened API/MCP boundary and Cognito PKCE foundation without replacing production resources. The Next.js companion implements the first authenticated person-to-shortlist journey locally, but public SSR hosting, a verified browser login, Alexa account linking and provider credentials remain external gates. The next model work is the licensed multilingual benchmark, a pinned fine-tuned artifact, privacy-log audit and shadow/canary rollout.
+Alexa+ is now the primary product direction; the original AWS preview remains frozen. An isolated `wanderwrap-development` stack hosts the hardened API/MCP boundary and Cognito PKCE foundation without replacing production resources. The Next.js companion now includes the public landing page, connections hub, explicit sign-up path, authenticated gift workspace and protected MCP browser simulator. The `wanderwrap-deployment-iam` stack provides a main-branch GitHub OIDC deployment role plus a separate CloudFormation execution role. Public Vercel hosting, production domain/DNS, one human verified browser journey, Alexa account linking and provider credentials remain external gates.
