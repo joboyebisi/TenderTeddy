@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="TenderTeddy Fire TV and Alexa local simulator">
+  <title>TenderTeddy Test Lab</title>
+  <link rel="stylesheet" href="test-lab.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="brand"><b>π</b><span>TenderTeddy</span></a>
+    <div><span class="eyebrow">LOCAL DEVICE LAB</span><h1>Fire TV × Alexa</h1></div>
+    <div class="status"><i id="serverLight"></i><span id="serverStatus">Connecting…</span></div>
+  </header>
+
+  <main>
+    <section class="control-strip">
+      <div><small>TEST FAMILY</small><strong id="familySummary">No test family yet</strong></div>
+      <div><small>SHARED SESSION</small><strong id="sessionSummary">Not started</strong></div>
+      <button id="setupDemo">Set up demo lesson</button>
+      <button id="startSession" class="primary" disabled>Start shared session</button>
+    </section>
+
+    <section class="lab-grid">
+      <article class="device-panel fire-panel">
+        <div class="panel-title"><div><small>SIMULATOR A</small><h2>Fire TV</h2></div><span>1920 × 1080 · D-pad</span></div>
+        <div class="television">
+          <div class="tv-screen" id="tvScreen" tabindex="-1">
+            <div class="tv-top"><b>TenderTeddy TV</b><span id="tvConnection">Waiting for a session</span></div>
+            <div class="video-stage"><span>Parent-approved lesson</span><div class="play-icon">▶</div><small>Official player placeholder</small></div>
+            <div class="checkpoint">
+              <div class="pye">π</div>
+              <div class="prompt"><small>PYE CHECK-IN · LETTER SOUNDS</small><h3 id="tvPrompt">Start the shared session to begin.</h3><p id="tvFeedback">Remote and Alexa answers arrive in the same session.</p>
+                <div class="answers">
+                  <button data-answer="ball" disabled><span>⚽</span>Ball</button>
+                  <button data-answer="cat" disabled><span>🐈</span>Cat</button>
+                  <button data-answer="sun" disabled><span>☀</span>Sun</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tv-foot"></div>
+        </div>
+        <div class="remote-row">
+          <div class="remote">
+            <button data-key="ArrowUp" aria-label="Remote up">▲</button>
+            <button data-key="ArrowLeft" aria-label="Remote left">◀</button>
+            <button data-key="Enter" class="select" aria-label="Remote select">OK</button>
+            <button data-key="ArrowRight" aria-label="Remote right">▶</button>
+            <button data-key="ArrowDown" aria-label="Remote down">▼</button>
+          </div>
+          <p><b>Keyboard:</b> use ← → and Enter. Focus must stay visible at ten-foot distance.</p>
+        </div>
+      </article>
+
+      <article class="device-panel alexa-panel">
+        <div class="panel-title"><div><small>SIMULATOR B</small><h2>Alexa</h2></div><span>Custom-skill envelope</span></div>
+        <div class="echo"><i></i><i></i><i></i><div class="echo-ring"></div></div>
+        <div class="conversation" id="conversation" aria-live="polite">
+          <div class="bubble alexa">Type “start lesson” when the approved lesson is ready.</div>
+        </div>
+        <form id="alexaForm">
+          <label for="utterance">Simulated utterance</label>
+          <div><input id="utterance" placeholder="Try: ball, repeat that, or stop" autocomplete="off"><button class="primary">Send</button></div>
+        </form>
+        <div class="quick-utterances">
+          <button>start lesson</button><button>cat</button><button>repeat that</button><button>ball</button><button>stop</button>
+        </div>
+        <details><summary>Latest Alexa request and response JSON</summary><pre id="alexaJson">No request sent yet.</pre></details>
+      </article>
+    </section>
+
+    <section class="event-panel">
+      <div class="panel-title"><div><small>AUTHORITATIVE TIMELINE</small><h2>Shared session events</h2></div><button id="clearLog">Clear view</button></div>
+      <div class="event-log" id="eventLog"><p class="empty">Start a session, then answer through either simulator.</p></div>
+    </section>
+  </main>
+  <div id="toast" role="status"></div>
+  <script type="module" src="test-lab.js"></script>
+</body>
+</html>

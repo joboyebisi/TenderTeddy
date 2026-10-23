@@ -1,0 +1,13 @@
+data/family.json
+.env
+.env.*
+!.env.example
+node_modules/
+.aws-sam/
+infra/package/
+infra/packaged.yaml
+*.zip
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties

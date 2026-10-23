@@ -1,0 +1,37 @@
+plugins {
+    id "com.android.application"
+}
+
+def tenderTeddyServerUrl = providers.gradleProperty("tenderTeddyServerUrl")
+        .orElse("https://kb03uya0w8.execute-api.eu-west-2.amazonaws.com/test-lab.html")
+        .get()
+
+android {
+    namespace "com.tenderteddy.firetv"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.tenderteddy.firetv"
+        minSdk 22
+        targetSdk 35
+        versionCode 1
+        versionName "0.1.0"
+        buildConfigField "String", "DEFAULT_SERVER_URL", "\"${tenderTeddyServerUrl}\""
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+}

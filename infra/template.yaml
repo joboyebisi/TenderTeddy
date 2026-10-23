@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: TenderTeddy hosted family alpha (API, web, DynamoDB and Gemini secret)
+
+Parameters:
+  GeminiModel:
+    Type: String
+    Default: gemini-3.8-flash
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [arm64]
+    Timeout: 30
+    MemorySize: 512
+    Tracing: Active
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref FamilyTable
+        GEMINI_SECRET_ID: !Ref GeminiSecret
+        GEMINI_MODEL: !Ref GeminiModel
+        HOUSEHOLD_ID: household-hosted-alpha
+
+Resources:
+  TenderTeddyApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","routeKey":"$context.routeKey","status":"$context.status","responseLength":"$context.responseLength","integrationError":"$context.integrationErrorMessage"}'
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 10
+      PropagateTags: true
+      Tags:
+        Application: TenderTeddy
+        Environment: alpha
+
+  TenderTeddyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: package/
+      Description: TenderTeddy hosted alpha API and web runtime
+      Handler: lambda.handler
+      ReservedConcurrentExecutions: 5
+      Tags:
+        Application: TenderTeddy
+        Environment: alpha
+      Events:
+        Root:
+          Type: HttpApi
+          Properties: { ApiId: !Ref TenderTeddyApi, Path: /, Method: ANY }
+        Proxy:
+          Type: HttpApi
+          Properties: { ApiId: !Ref TenderTeddyApi, Path: '/{proxy+}', Method: ANY }
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref FamilyTable }
+        - AWSSecretsManagerGetSecretValuePolicy: { SecretArn: !Ref GeminiSecret }
+
+  FamilyTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: householdId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: householdId
+          KeyType: HASH
+      PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true }
+      SSESpecification: { SSEEnabled: true }
+      Tags:
+        - { Key: Application, Value: TenderTeddy }
+        - { Key: Environment, Value: alpha }
+
+  GeminiSecret:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: Rotated Gemini API key for TenderTeddy
+      SecretString: '{"GEMINI_API_KEY":""}'
+      Tags:
+        - { Key: Application, Value: TenderTeddy }
+        - { Key: Environment, Value: alpha }
+
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub '/aws/http-api/${AWS::StackName}'
+      RetentionInDays: 30
+      Tags:
+        - { Key: Application, Value: TenderTeddy }
+        - { Key: Environment, Value: alpha }
+
+  FunctionErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: TenderTeddy Lambda returned one or more errors in five minutes
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref TenderTeddyFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Tags:
+        - { Key: Application, Value: TenderTeddy }
+        - { Key: Environment, Value: alpha }
+
+Outputs:
+  AppUrl:
+    Description: Hosted TenderTeddy URL
+    Value: !Sub 'https://${TenderTeddyApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/'
+  GeminiSecretId:
+    Description: Secret to update with the rotated Gemini API key
+    Value: !Ref GeminiSecret
+  FamilyTableName:
+    Value: !Ref FamilyTable
