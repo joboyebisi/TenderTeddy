@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WanderWrap gift board</title>
+  <style>
+    :root{color-scheme:light dark;--paper:var(--color-background-primary,#fffaf3);--card:var(--color-background-secondary,#fff);--ink:var(--color-text-primary,#201e1b);--muted:var(--color-text-secondary,#665f57);--line:var(--color-border-primary,#d9d1c6);--accent:#d85846;--accent2:#23463d;--focus:#1769aa;font:16px/1.45 system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:transparent;color:var(--ink)}main{min-height:100%;padding:16px;background:var(--paper);border:1px solid var(--line);border-radius:24px}.fullscreen{border:0;border-radius:0;padding:clamp(18px,4vw,48px)}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}.brand{display:flex;align-items:center;gap:10px;font-weight:800}.mark{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:var(--accent);color:white}.mode{border:1px solid var(--line);background:var(--card);color:var(--ink)}button{min-width:48px;min-height:48px;border:0;border-radius:14px;padding:10px 15px;font:inherit;font-weight:750;cursor:pointer}button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.hero{background:linear-gradient(135deg,var(--accent2),#315e51);color:white;padding:18px;border-radius:18px}.hero p{margin:6px 0 0;max-width:62ch}.eyebrow{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;opacity:.8}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:12px}.card{display:flex;flex-direction:column;min-height:190px;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:18px}.card h2{font-size:1.05rem;line-height:1.25;margin:4px 0}.price{color:var(--accent);font-weight:850}.story{color:var(--muted);font-size:.9rem;flex:1}.why{font-size:.78rem;color:var(--muted)}.choose{width:100%;background:var(--accent);color:white}.next{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:16px}.next p{margin:0}.status{padding:4px 9px;border-radius:999px;background:#dceae1;color:#173c2e;font-size:.75rem;font-weight:800}.empty{padding:28px;text-align:center;color:var(--muted)}@media(prefers-color-scheme:dark){:root{--paper:#191b1a;--card:#242725;--ink:#f7f2e9;--muted:#c1bbb2;--line:#454944}.status{background:#254c3c;color:#e2fff1}}@media(max-width:460px){main{border-radius:0}.grid{grid-template-columns:1fr}.next{align-items:flex-start;flex-direction:column}}@media(prefers-reduced-motion:no-preference){.card{transition:transform .18s ease}.card:hover{transform:translateY(-2px)}}
+  </style>
+</head>
+<body>
+  <main id="app" aria-live="polite">
+    <header>
+      <div class="brand"><span class="mark" aria-hidden="true">W</span><span>WanderWrap</span></div>
+      <button class="mode" id="modeButton" type="button" hidden aria-label="Open gift board full screen">Expand</button>
+    </header>
+    <section id="content"><div class="empty">Ask Alexa+ to find a thoughtful gift.</div></section>
+  </main>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

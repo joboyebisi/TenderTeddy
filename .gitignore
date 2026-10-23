@@ -1,0 +1,11 @@
+node_modules/
+.npm-cache/
+.deploy/
+.env
+.env.*
+!.env.example
+apps/web/.next/
+alexa/dist/
+coverage/
+.aws-sam/
+*.log

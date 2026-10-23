@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WanderWrap Alexa+ Simulator</title>
+  <link rel="stylesheet" href="alexa-simulator.css">
+</head>
+<body>
+  <main>
+    <header>
+      <a href="/">WanderWrap</a>
+      <span>Alexa+ simulated experience</span>
+    </header>
+
+    <section class="device" aria-labelledby="simulator-title">
+      <div class="device-bar">
+        <div><i></i><i></i><i></i></div>
+        <label class="surface-label" for="surface">Surface</label>
+        <select id="surface" aria-label="Simulated Alexa surface">
+          <option value="show8">Echo Show 8</option>
+          <option value="show15">Echo Show 15</option>
+          <option value="mobile">Alexa mobile</option>
+          <option value="voice">Voice only</option>
+        </select>
+        <span id="connection">Local MCP App</span>
+      </div>
+      <section class="visual" id="visual" aria-live="polite" aria-label="Alexa+ visual response">
+        <p>Visual recommendations will appear here on screened devices.</p>
+      </section>
+      <div class="conversation" id="conversation" aria-live="polite">
+        <div class="message alexa">
+          <small>Alexa+</small>
+          <p>Hi. Ask WanderWrap to find a thoughtful gift, or choose a demo journey below.</p>
+        </div>
+      </div>
+      <form id="promptForm">
+        <label for="prompt">Test utterance</label>
+        <div class="composer">
+          <input id="prompt" value="Find a thoughtful gift for my sister in Toronto. She likes ceramics and slow weekends. Keep it under GBP 60." autocomplete="off">
+          <button type="submit">Run</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="scenarios" aria-labelledby="simulator-title">
+      <div>
+        <p class="eyebrow">DEVICE-FREE DEMO HARNESS</p>
+        <h1 id="simulator-title">Test the Alexa+ journey without an Echo.</h1>
+        <p>This page calls WanderWrap's real MCP endpoint and previews voice-only, mobile, Echo Show inline, and fullscreen behaviour. Provider availability is an explicitly labelled fixture; recommendation and routing decisions are produced by the application code.</p>
+      </div>
+      <div class="scenario-grid">
+        <button data-scenario="amazon"><b>Amazon route</b><span>Deliverable physical gift in Canada</span></button>
+        <button data-scenario="paypal"><b>PayPal fallback</b><span>Amazon unavailable; approved local supplier</span></button>
+        <button data-scenario="xoom"><b>Xoom handoff</b><span>Cross-border money gift</span></button>
+      </div>
+    </section>
+
+    <details class="trace" open>
+      <summary>MCP trace</summary>
+      <pre id="trace">Waiting for a scenario…</pre>
+    </details>
+  </main>
+  <script type="module" src="alexa-simulator.js"></script>
+</body>
+</html>

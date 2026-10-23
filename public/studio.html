@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173d35">
+  <meta name="description" content="WanderWrap — turn confirmed clues into thoughtful, deliverable gifts.">
+  <title>WanderWrap</title>
+  <link rel="stylesheet" href="studio.css">
+</head>
+<body>
+  <aside class="rail" aria-label="Main navigation">
+    <a class="mark" href="/" aria-label="WanderWrap home">w<span>w</span></a>
+    <nav>
+      <button class="active" data-view="home" aria-label="Overview"><span>⌂</span><small>Home</small></button>
+      <button data-view="people" aria-label="People"><span>♙</span><small>People</small></button>
+      <button data-view="gifts" aria-label="Gifts"><span>◇</span><small>Gifts</small></button>
+      <button data-view="audit" aria-label="Privacy log"><span>✓</span><small>Trust</small></button>
+    </nav>
+    <button class="avatar" id="accountButton" aria-label="Account">WW</button>
+  </aside>
+
+  <main>
+    <header>
+      <div><small id="eyebrow">YOUR THOUGHTFUL GIFTING SPACE</small><h1 id="viewTitle">Good to see you.</h1></div>
+      <div class="header-actions"><span class="live"><i></i> AWS live</span><button class="quiet" id="signOut">Sign out</button><button class="primary" id="newRecipient">Add person</button></div>
+    </header>
+
+    <section class="view active" id="home">
+      <div class="hero">
+        <div><span class="pill">Permission-first gifting</span><h2>Notice more.<br><em>Guess less.</em></h2><p>Save only the clues people choose to share. WanderWrap explains every match and lets you approve every provider handoff.</p><button class="ink" data-go="people">Find a thoughtful gift →</button></div>
+        <div class="hero-art"><div class="parcel">WW<i></i></div><span class="note one">“loves small adventures”<b>confirmed</b></span><span class="note two">Price checked by provider<b>not invented</b></span></div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="dashboard-grid">
+        <article class="panel wide"><div class="section-title"><div><small>YOUR PEOPLE</small><h3>Who are you celebrating?</h3></div><button data-go="people">View all</button></div><div id="peoplePreview" class="people-list"></div></article>
+        <article class="panel"><small>TRUST CENTRE</small><h3>Clear by design</h3><ul class="trust-list"><li><span>✓</span> Only confirmed clues rank gifts</li><li><span>✓</span> Every recommendation cites its evidence</li><li><span>✓</span> Addresses stay hidden from senders</li><li><span>✓</span> Checkout always happens with the provider</li></ul></article>
+      </div>
+    </section>
+
+    <section class="view" id="people">
+      <div class="section-title page-title"><div><small>RECIPIENT PROFILES</small><h2>People and their clues</h2></div><p>Private to your account. Delete a clue at any time.</p></div>
+      <div class="people-layout">
+        <aside class="panel people-sidebar"><div id="peopleList" class="people-list"></div><button class="full quiet" id="addPersonSide">+ Add a person</button></aside>
+        <section class="panel workspace" id="recipientWorkspace"><div class="empty-state"><span>♙</span><h3>Add someone you care about</h3><p>Then save a few explicit interests to build an explainable shortlist.</p><button class="primary" id="emptyAdd">Add a person</button></div></section>
+      </div>
+    </section>
+
+    <section class="view" id="gifts">
+      <div class="section-title page-title"><div><small>APPROVAL & CLAIMS</small><h2>Your gifts</h2></div><p>No order or money transfer is completed here.</p></div>
+      <div id="giftList" class="gift-list"></div>
+    </section>
+
+    <section class="view" id="audit">
+      <div class="section-title page-title"><div><small>PRIVACY & DECISION LOG</small><h2>What WanderWrap did</h2></div><p>Append-only events for recommendations, approvals and handoffs.</p></div>
+      <article class="panel"><div id="auditList" class="audit-list"></div></article>
+    </section>
+  </main>
+
+  <section class="auth-shell" id="authShell">
+    <div class="auth-brand"><a class="wordmark" href="/">wander<span>wrap</span> ✦</a><div><p class="kicker">THOUGHTFUL, WITHOUT THE GUESSWORK</p><h2>A calm place for every person, clue and gift.</h2><p>Real accounts, private data and verified email are powered by Amazon Cognito.</p></div><small>WanderWrap never purchases automatically.</small></div>
+    <div class="auth-card">
+      <p class="kicker">WELCOME</p><h1 id="authTitle">Sign in</h1><p id="authCopy">Continue to your private gifting space.</p>
+      <form id="authForm">
+        <label>Email<input type="email" name="email" autocomplete="email" required></label>
+        <label id="passwordLabel">Password<input type="password" name="password" autocomplete="current-password" minlength="10" required></label>
+        <label id="codeLabel" hidden>Verification code<input name="code" inputmode="numeric" autocomplete="one-time-code"></label>
+        <button class="primary full" id="authSubmit">Sign in</button>
+      </form>
+      <button class="text-button" id="authSwitch">New to WanderWrap? Create an account</button>
+      <button class="text-button" id="forgotPassword">Forgot password?</button>
+      <p class="auth-message" id="authMessage" role="status"></p>
+    </div>
+  </section>
+
+  <dialog id="recipientDialog"><form method="dialog" id="recipientForm"><button class="dialog-x" value="cancel" aria-label="Close">×</button><small>NEW RECIPIENT</small><h2>Who are you celebrating?</h2><label>Name<input name="displayName" maxlength="80" required></label><label>Relationship<input name="relationship" maxlength="80" placeholder="Friend, sibling, colleague…"></label><div class="field-row"><label>Country<select name="country"><option value="GB">United Kingdom</option><option value="US">United States</option><option value="CA">Canada</option><option value="IE">Ireland</option><option value="DE">Germany</option><option value="FR">France</option></select></label><label>Occasion<input name="occasion" maxlength="120" placeholder="Birthday, Christmas…"></label></div><button class="primary full" value="default">Save person</button></form></dialog>
+  <div id="toast" role="status"></div>
+  <script type="module" src="studio.js"></script>
+</body>
+</html>

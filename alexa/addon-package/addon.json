@@ -1,0 +1,83 @@
+{
+  "manifestVersion": "1.0",
+  "storeListing": {
+    "distributionCountries": ["GB", "US"],
+    "locales": {
+      "en-GB": {
+        "default": "DEFAULT",
+        "name": { "value": "WanderWrap" },
+        "shortDescription": "Find thoughtful gifts, compare safe fulfilment routes, and continue only when you approve.",
+        "fullDescription": "WanderWrap is a multimodal gifting companion for Alexa+. Describe who you are celebrating, what they enjoy, where they live, and your budget. WanderWrap explains up to four ideas using only preferences you have confirmed, then checks an appropriate Amazon, PayPal, Xoom, or manual fulfilment route. On screened devices you can compare gift cards and continue by touch; every journey also works by voice alone. WanderWrap never purchases or transfers money automatically. Alexa+ asks for confirmation and owns the secure payment handoff.",
+        "examplePhrases": [
+          "Ask WanderWrap for a thoughtful gift for my sister under sixty pounds",
+          "Find a local experience gift for Maya in Toronto",
+          "Help me send a birthday money gift to my cousin in Nigeria",
+          "Show me gift ideas for someone who likes ceramics and slow weekends"
+        ],
+        "privacyAndCompliance": {
+          "privacyPolicyUrl": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/privacy.html",
+          "termsOfUseUrl": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/terms.html"
+        },
+        "mediaAssets": {
+          "icons": {
+            "light": [
+              { "size": "72x72", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-72.png" },
+              { "size": "64x64", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-64.png" },
+              { "size": "88x88", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-88.png" },
+              { "size": "126x126", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-126.png" },
+              { "size": "180x180", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-180.png" },
+              { "size": "241x241", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-241.png" }
+            ],
+            "dark": []
+          },
+          "carouselImages": [
+            { "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/carousel-600x900.png", "altText": "A coral gift box with a handmade ceramic cup, green travel journal, experience card, and ribbon.", "size": "600x900" }
+          ],
+          "bannerImages": []
+        }
+      },
+      "en-US": {
+        "name": { "value": "WanderWrap" },
+        "shortDescription": "Find thoughtful gifts, compare safe fulfillment routes, and continue only when you approve.",
+        "fullDescription": "WanderWrap is a multimodal gifting companion for Alexa+. Describe who you are celebrating, what they enjoy, where they live, and your budget. WanderWrap explains up to four ideas using only preferences you have confirmed, then checks an appropriate Amazon, PayPal, Xoom, or manual fulfillment route. On screened devices you can compare gift cards and continue by touch; every journey also works by voice alone. WanderWrap never purchases or transfers money automatically. Alexa+ asks for confirmation and owns the secure payment handoff.",
+        "examplePhrases": [
+          "Ask WanderWrap for a thoughtful gift for my sister under sixty dollars",
+          "Find a local experience gift for Maya in Toronto",
+          "Help me send a birthday money gift to my cousin in Nigeria",
+          "Show me gift ideas for someone who likes ceramics and slow weekends"
+        ],
+        "privacyAndCompliance": {
+          "privacyPolicyUrl": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/privacy.html",
+          "termsOfUseUrl": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/terms.html"
+        },
+        "mediaAssets": {
+          "icons": {
+            "light": [
+              { "size": "72x72", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-72.png" },
+              { "size": "64x64", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-64.png" },
+              { "size": "88x88", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-88.png" },
+              { "size": "126x126", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-126.png" },
+              { "size": "180x180", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-180.png" },
+              { "size": "241x241", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/icon-241.png" }
+            ],
+            "dark": []
+          },
+          "carouselImages": [
+            { "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/alexa-media/carousel-600x900.png", "altText": "A coral gift box with a handmade ceramic cup, green travel journal, experience card, and ribbon.", "size": "600x900" }
+          ],
+          "bannerImages": []
+        }
+      }
+    }
+  },
+  "integrations": [
+    {
+      "type": "MCP",
+      "config": {
+        "endpoints": {
+          "default": { "type": "HTTPS", "uri": "https://jobcy5qznb.execute-api.eu-west-2.amazonaws.com/mcp" }
+        }
+      }
+    }
+  ]
+}
